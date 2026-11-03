@@ -75,6 +75,11 @@ namespace StarterAssets
         [Tooltip("For locking the camera position on all axis")]
         public bool LockCameraPosition = false;
 
+        private bool _wasGrounded = true;
+
+        [Tooltip("Minimum downward speed (m/s) to play the landing sound. Prevents sounds on small steps")]
+        public float MinLandingSpeed = 3.5f;
+
         // cinemachine
         private float _cinemachineTargetYaw;
         private float _cinemachineTargetPitch;
@@ -182,6 +187,12 @@ namespace StarterAssets
                 transform.position.z);
             Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers,
                 QueryTriggerInteraction.Ignore);
+
+            if (Grounded && !_wasGrounded && LandingAudioClip != null && _verticalVelocity < -MinLandingSpeed)
+            {
+                AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+            }
+            _wasGrounded = Grounded;
 
             // update animator if using character
             if (_hasAnimator)
@@ -383,10 +394,10 @@ namespace StarterAssets
 
         private void OnLand(AnimationEvent animationEvent)
         {
-            if (animationEvent.animatorClipInfo.weight > 0.5f)
-            {
-                AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
-            }
+            //if (animationEvent.animatorClipInfo.weight > 0.5f)
+            //{
+            //    AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+            //}
         }
 
         //___________________________________________EDITS_____________________________________________________
@@ -399,6 +410,14 @@ namespace StarterAssets
             {
                 _animator.SetBool(_animIDJump, true);
             }
+        }
+
+        public void ApplyThrust(float acceleration, float maxUpSpeed)
+        {
+            // lift off cleanly: cancel the small downward "stick to ground" velocity
+            if (Grounded && _verticalVelocity < 0f) _verticalVelocity = 0f;
+
+            _verticalVelocity = Mathf.Min(_verticalVelocity + acceleration * Time.deltaTime, maxUpSpeed);
         }
     }
 }
