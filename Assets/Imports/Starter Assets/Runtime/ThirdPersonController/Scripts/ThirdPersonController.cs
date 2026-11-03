@@ -388,5 +388,17 @@ namespace StarterAssets
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
             }
         }
+
+        //___________________________________________EDITS_____________________________________________________
+        public void Bounce(float height)
+        {
+            // same formula as your jump: v = sqrt(h * -2 * g)
+            _verticalVelocity = Mathf.Sqrt(height * -2f * Gravity);
+
+            if (_hasAnimator)
+            {
+                _animator.SetBool(_animIDJump, true);
+            }
+        }
     }
 }
