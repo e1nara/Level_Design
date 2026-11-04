@@ -13,8 +13,11 @@ public class SporeMushroom : MonoBehaviour
     public float Cooldown = 5f;
 
     [Header("Spores")]
-    [Tooltip("Particle system placed at the cap of the mushroom")]
-    public ParticleSystem SporeParticles;
+    [Tooltip("Particle system PREFAB (from the Project window). A new copy is created for every puff")]
+    public ParticleSystem SporePrefab;
+
+    [Tooltip("Where the spores appear, e.g. an empty child at the cap. Defaults to this object")]
+    public Transform SporeOrigin;
 
     [Tooltip("How many spore particles are released per puff")]
     public int SporeCount = 60;
@@ -112,16 +115,28 @@ public class SporeMushroom : MonoBehaviour
 
     private void ReleaseSpores()
     {
-        if (SporeParticles != null)
+        if (SporePrefab != null)
         {
-            SporeParticles.Play();
-            SporeParticles.Emit(SporeCount);
+            Transform origin = SporeOrigin != null ? SporeOrigin : transform;
+
+            // keep the prefab's own rotation (e.g. cone pointing up) on top of the origin's rotation
+            ParticleSystem spores = Instantiate(
+                SporePrefab,
+                origin.position,
+                origin.rotation * SporePrefab.transform.rotation);
+
+            spores.Play();
+            spores.Emit(SporeCount);
+
+            // remove the copy once the last particle has faded out
+            var main = spores.main;
+            Destroy(spores.gameObject, main.duration + main.startLifetime.constantMax);
         }
 
-        if (PuffSound != null)
-        {
-            AudioSource.PlayClipAtPoint(PuffSound, transform.position, Volume);
-        }
+        //if (PuffSound != null)
+        //{
+        //    AudioSource.PlayClipAtPoint(PuffSound, transform.position, Volume);
+        //}
     }
 
     private void OnDrawGizmosSelected()
@@ -130,3 +145,4 @@ public class SporeMushroom : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, TriggerRadius);
     }
 }
+
