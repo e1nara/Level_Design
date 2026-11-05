@@ -68,7 +68,7 @@ public class SporeMushroom : MonoBehaviour
     {
         if (_routine != null) return; // already puffing
         if (Time.time - _lastPuffTime < Cooldown) return;
-        if (!other.TryGetComponent(out ThirdPersonController _)) return;
+        //if (!other.TryGetComponent(out ThirdPersonController _)) return;
 
         _lastPuffTime = Time.time;
         _routine = StartCoroutine(PuffRoutine());
