@@ -412,6 +412,16 @@ namespace StarterAssets
             }
         }
 
+        public void SteerVerticalVelocity(float targetVelocity, float maxChangePerSecond)
+        {
+            // lift off cleanly from the ground
+            if (Grounded && _verticalVelocity < 0f) _verticalVelocity = 0f;
+
+            // aim slightly high to cancel the gravity this frame will add, so hovering is steady
+            float target = targetVelocity - Gravity * Time.deltaTime;
+            _verticalVelocity = Mathf.MoveTowards(_verticalVelocity, target, maxChangePerSecond * Time.deltaTime);
+        }
+
         public void ApplyThrust(float acceleration, float maxUpSpeed)
         {
             // lift off cleanly: cancel the small downward "stick to ground" velocity

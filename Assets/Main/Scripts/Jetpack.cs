@@ -9,25 +9,32 @@ public class Jetpack : MonoBehaviour
     [Tooltip("Hold to use the jetpack. Add more bindings (e.g. gamepad) in the Inspector")]
     public InputAction JetpackInput = new InputAction("Jetpack", InputActionType.Button, "<Keyboard>/f");
 
-    [Header("Thrust")]
-    [Tooltip("Upward acceleration in m/s^2. Must be higher than your controller's gravity (15)")]
-    public float ThrustAcceleration = 30f;
-
-    [Tooltip("The jetpack won't push you upward faster than this (m/s)")]
+    [Header("Movement")]
+    [Tooltip("Top climbing speed (m/s)")]
     public float MaxUpwardSpeed = 6f;
+
+    [Tooltip("How quickly vertical speed changes toward its target (m/s^2). Higher = snappier, lower = smoother")]
+    public float ThrustAcceleration = 25f;
 
     [Header("Height Limit")]
     [Tooltip("Max height above the last place the player stood on the ground")]
     public float MaxHeightAboveGround = 12f;
 
-    [Tooltip("Thrust fades out over this many meters below the limit, so it feels like a soft ceiling")]
-    public float SoftCeilingZone = 2f;
+    [Tooltip("Climb speed eases down to zero over this many meters below the limit")]
+    public float SoftCeilingZone = 3f;
+
+    [Header("Hover Bob")]
+    [Tooltip("How far (meters) the player drifts up and down while hovering near the height limit. 0 = perfectly steady")]
+    public float BobHeight = 0.15f;
+
+    [Tooltip("Bobs per second while hovering")]
+    public float BobFrequency = 0.8f;
 
     [Header("Fuel")]
     public float MaxFuel = 100f;
     public float StartingFuel = 100f;
 
-    [Tooltip("Fuel used per second while thrusting")]
+    [Tooltip("Fuel used per second while the jetpack is active (including hovering)")]
     public float FuelDrainPerSecond = 20f;
 
     [Tooltip("Fuel regained per second while standing on the ground. 0 = only fuel packs refill")]
@@ -42,16 +49,16 @@ public class Jetpack : MonoBehaviour
     public bool IsThrusting { get; private set; }
 
     private ThirdPersonController _controller;
-    private float _groundY;
     private Animator _animator;
     private readonly int _animIDJetpack = Animator.StringToHash("Jetpack");
-    
+    private float _groundY;
+
     private void Awake()
     {
         _controller = GetComponent<ThirdPersonController>();
+        _animator = GetComponentInChildren<Animator>();
         Fuel = Mathf.Clamp(StartingFuel, 0f, MaxFuel);
         _groundY = transform.position.y;
-        TryGetComponent(out _animator);
     }
 
     private void OnEnable() => JetpackInput.Enable();
@@ -69,19 +76,27 @@ public class Jetpack : MonoBehaviour
             }
         }
 
-        // 1 well below the limit, fading to 0 at the limit
-        float heightLeft = (_groundY + MaxHeightAboveGround) - transform.position.y;
-        float ceilingFactor = Mathf.Clamp01(heightLeft / Mathf.Max(0.01f, SoftCeilingZone));
+        // the jetpack is "active" for as long as the button is held and there is fuel
+        bool active = JetpackInput.IsPressed() && Fuel > 0f;
 
-        bool wantsThrust = JetpackInput.IsPressed() && Fuel > 0f && ceilingFactor > 0f;
-
-        if (wantsThrust)
+        if (active)
         {
-            _controller.ApplyThrust(ThrustAcceleration * ceilingFactor, MaxUpwardSpeed);
+            // target climb speed: full speed far below the limit, easing to 0 at the limit
+            // (and a gentle push downward if the player is somehow above it)
+            float heightLeft = (_groundY + MaxHeightAboveGround) - transform.position.y;
+            float t = Mathf.Clamp(heightLeft / Mathf.Max(0.01f, SoftCeilingZone), -1f, 1f);
+            float targetSpeed = MaxUpwardSpeed * (t > 0f ? Mathf.SmoothStep(0f, 1f, t) : t);
+
+            // gentle bob: full strength when hovering, fading out while climbing at speed
+            float hoverWeight = 1f - Mathf.Clamp01(Mathf.Abs(targetSpeed) / Mathf.Max(0.01f, MaxUpwardSpeed));
+            float omega = BobFrequency * 2f * Mathf.PI;
+            targetSpeed += Mathf.Cos(Time.time * omega) * BobHeight * omega * hoverWeight;
+
+            _controller.SteerVerticalVelocity(targetSpeed, ThrustAcceleration);
             Fuel = Mathf.Max(0f, Fuel - FuelDrainPerSecond * Time.deltaTime);
         }
 
-        SetThrusting(wantsThrust);
+        SetThrusting(active);
     }
 
     public void AddFuel(float amount)
@@ -93,6 +108,7 @@ public class Jetpack : MonoBehaviour
     {
         if (thrusting == IsThrusting) return;
         IsThrusting = thrusting;
+
         if (_animator != null) _animator.SetBool(_animIDJetpack, thrusting);
 
         if (ThrustParticles != null)
@@ -108,4 +124,3 @@ public class Jetpack : MonoBehaviour
         }
     }
 }
-
