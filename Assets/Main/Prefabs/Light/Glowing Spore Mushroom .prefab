@@ -239,7 +239,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -281,12 +281,12 @@ MonoBehaviour:
   SporePrefab: {fileID: 198762310510596846, guid: f68c55851f485c240952b4b45648adda, type: 3}
   SporeOrigin: {fileID: 102344420253379921}
   SporeCount: 60
-  SporeDelay: 0.35
+  SporeDelay: 1
   CloudDuration: 6
   PuffSound: {fileID: 0}
   Volume: 0.5
-  ShakeDuration: 0.7
-  ShakeAngle: 8
+  ShakeDuration: 1
+  ShakeAngle: 10
   ShakeFrequency: 35
   PuffScale: 0.15
   TouchLayers:
@@ -301,8 +301,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7215878336210792575}
-  - component: {fileID: 6308843493950370332}
   - component: {fileID: 3161423710868955459}
+  - component: {fileID: 4192558169499970970}
   m_Layer: 0
   m_Name: SporeTrigger
   m_TagString: Untagged
@@ -325,8 +325,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 102344420253379921}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &6308843493950370332
-BoxCollider:
+--- !u!114 &3161423710868955459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3423082849813464491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc577dfb6a9357f4aa9cbc4b6d00e502, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SporeTrigger
+  Mushroom: {fileID: 0}
+--- !u!135 &4192558169499970970
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -344,18 +357,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Radius: 2
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3161423710868955459
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3423082849813464491}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc577dfb6a9357f4aa9cbc4b6d00e502, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SporeTrigger
-  Mushroom: {fileID: 0}
