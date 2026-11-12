@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class SporeMushroom : MonoBehaviour
 {
-    [Header("Trigger")]
-    [Tooltip("How close the player must get (meters) for the screen effect to apply. Measured from this object's pivot")]
-    public float TriggerRadius = 3f;
-
+    [Header("Puff")]
     [Tooltip("Seconds before the mushroom can puff again")]
     public float Cooldown = 5f;
 
+    [Tooltip("Which layers can set off the puff by touching the mushroom. Default: everything")]
+    public LayerMask TouchLayers = ~0;
+
     [Header("Spores")]
-    [Tooltip("Particle system PREFAB (from the Project window). A new copy is created for every puff")]
+    [Tooltip("Spore cloud PREFAB (from the Project window). Put the SporeCloud component on it to give the cloud its own effect radius. A new copy is created for every puff")]
     public ParticleSystem SporePrefab;
 
     [Tooltip("Where the spores appear, e.g. an empty child at the cap. Defaults to this object")]
@@ -23,9 +23,6 @@ public class SporeMushroom : MonoBehaviour
 
     [Tooltip("Delay between the shake starting and the spores releasing")]
     public float SporeDelay = 0.35f;
-
-    [Tooltip("How long (seconds) the spore cloud counts as 'in the air' after a puff. The screen effect only applies during this time. Match it to your particles' lifetime")]
-    public float CloudDuration = 6f;
 
     public AudioClip PuffSound;
     [Range(0f, 1f)] public float Volume = 0.5f;
@@ -53,60 +50,6 @@ public class SporeMushroom : MonoBehaviour
         _originalScale = transform.localScale;
     }
 
-    [Header("Touch")]
-    [Tooltip("Which layers can set off the puff by touching the mushroom. Default: everything")]
-    public LayerMask TouchLayers = ~0;
-
-    private const float ExitHysteresis = 0.3f; // extra meters before the player counts as "left", prevents flicker at the edge
-
-    private static Transform _player;
-
-    private bool _playerInside;   // player is inside the radius
-    private bool _affecting;      // this mushroom is currently applying the screen effect
-    private float _cloudEndTime = -1f;
-
-    private static Transform GetPlayer()
-    {
-        if (_player == null)
-        {
-            ThirdPersonController controller = FindFirstObjectByType<ThirdPersonController>();
-            if (controller != null) _player = controller.transform;
-        }
-        return _player;
-    }
-
-    // A plain distance check instead of a trigger collider: it doesn't depend on physics events,
-    // so the shaking and swelling of the mushroom can't make it flicker
-    private void UpdatePlayerInside()
-    {
-        Transform player = GetPlayer();
-        if (player == null)
-        {
-            _playerInside = false;
-            return;
-        }
-
-        float distance = Vector3.Distance(player.position, transform.position);
-        float limit = _playerInside ? TriggerRadius + ExitHysteresis : TriggerRadius;
-        _playerInside = distance <= limit;
-    }
-
-    // The screen effect applies only while the player is in the radius AND spores are in the air
-    private void Update()
-    {
-        UpdatePlayerInside();
-
-        bool shouldAffect = _playerInside && Time.time < _cloudEndTime;
-        if (shouldAffect == _affecting) return;
-
-        SporeVisionEffect effect = SporeVisionEffect.Instance;
-        if (effect == null) return;
-
-        _affecting = shouldAffect;
-        if (_affecting) effect.Enter();
-        else effect.Exit();
-    }
-
     // Called by SporeTouchSensor when something touches the mushroom
     public void NotifyTouched(Collider other)
     {
@@ -121,17 +64,6 @@ public class SporeMushroom : MonoBehaviour
 
         _lastPuffTime = Time.time;
         _routine = StartCoroutine(PuffRoutine());
-    }
-
-    private void OnDisable()
-    {
-        // if the mushroom is destroyed or disabled while affecting the player, don't leave the effect stuck on
-        _playerInside = false;
-        if (_affecting && SporeVisionEffect.Instance != null)
-        {
-            SporeVisionEffect.Instance.Exit();
-        }
-        _affecting = false;
     }
 
     private IEnumerator PuffRoutine()
@@ -175,13 +107,13 @@ public class SporeMushroom : MonoBehaviour
 
     private void ReleaseSpores()
     {
-        _cloudEndTime = Time.time + CloudDuration;
-
         if (SporePrefab != null)
         {
             Transform origin = SporeOrigin != null ? SporeOrigin : transform;
 
-            // keep the prefab's own rotation (e.g. cone pointing up) on top of the origin's rotation
+            // The cloud is NOT parented to the mushroom, so resizing or swelling the mushroom
+            // doesn't change the cloud's size or its effect radius (that lives on the SporeCloud component).
+            // Keep the prefab's own rotation (e.g. cone pointing up) on top of the origin's rotation.
             ParticleSystem spores = Instantiate(
                 SporePrefab,
                 origin.position,
@@ -199,11 +131,5 @@ public class SporeMushroom : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(PuffSound, transform.position, Volume);
         }
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = new Color(0.6f, 1f, 0.3f, 0.35f);
-        Gizmos.DrawWireSphere(transform.position, TriggerRadius);
     }
 }

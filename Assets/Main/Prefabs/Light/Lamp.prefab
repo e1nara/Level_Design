@@ -1220,6 +1220,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7415909883106498461}
+  - component: {fileID: 1804740843757875561}
+  - component: {fileID: 1753888930582585872}
+  - component: {fileID: 4576229231756133393}
   m_Layer: 0
   m_Name: Lamp
   m_TagString: Untagged
@@ -1246,6 +1249,65 @@ Transform:
   - {fileID: 9089210778040738946}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1804740843757875561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8383451254981869238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cb7b57efad5cea46916bbf2c5508d59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightSource
+  IsLit: 1
+--- !u!114 &1753888930582585872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8383451254981869238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25ce31441026ae64b896fc4941e6f092, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Lamp
+  StartOn: 1
+  Spotlight: {fileID: 7430122294198392160}
+  LampRenderer: {fileID: 0}
+  MaterialIndex: 0
+  FadeTime: 0.2
+  ToggleSound: {fileID: 0}
+  Volume: 0.6
+  OnTurnedOn:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTurnedOff:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!135 &4576229231756133393
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8383451254981869238}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &9163482448437936956
 GameObject:
   m_ObjectHideFlags: 0
@@ -1292,8 +1354,8 @@ Light:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
   m_Range: 10
-  m_SpotAngle: 30
-  m_InnerSpotAngle: 21.80208
+  m_SpotAngle: 104.80597
+  m_InnerSpotAngle: 81.914024
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
     m_Type: 0

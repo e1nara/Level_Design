@@ -24,13 +24,13 @@ public class Letter : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
         playerInRange = true;
-        LetterUI.Instance.ShowPrompt(true);
+        LetterUI.Instance.ShowReadPrompt(true);
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player")) return;
         playerInRange = false;
-        LetterUI.Instance.ShowPrompt(false);
+        LetterUI.Instance.ShowReadPrompt(false);
     }
 }

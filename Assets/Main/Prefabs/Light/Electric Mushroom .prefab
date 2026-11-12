@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7316688855232909517
 Transform:
   m_ObjectHideFlags: 0
@@ -139,6 +139,7 @@ GameObject:
   - component: {fileID: 3336826649923260334}
   - component: {fileID: 8376709726598344289}
   - component: {fileID: 14549620298385818}
+  - component: {fileID: 3078311695213178666}
   m_Layer: 0
   m_Name: 'Electric Mushroom '
   m_TagString: Untagged
@@ -240,3 +241,28 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3078311695213178666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 852041833602210429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb5e05eb34a03e548901c05680e60898, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ElectricMushroom
+  DetectionRadius: 5
+  CheckInterval: 0.1
+  GlowRenderer: {fileID: 0}
+  MaterialIndex: 0
+  ActiveIntensity: 1
+  DullIntensity: 0.08
+  FadeDuration: 0.7
+  OnPowered:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnpowered:
+    m_PersistentCalls:
+      m_Calls: []

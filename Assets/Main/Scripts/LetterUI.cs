@@ -6,7 +6,9 @@ public class LetterUI : MonoBehaviour
 {
     public static LetterUI Instance { get; private set; }
 
-    [SerializeField] private GameObject promptObject;
+    [SerializeField] private GameObject readPrompt;
+    [SerializeField] private GameObject usePrompt;
+
     [SerializeField] private GameObject letterPanel;
     [SerializeField] private TMP_Text letterText;
 
@@ -15,7 +17,7 @@ public class LetterUI : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        promptObject.SetActive(false);
+        readPrompt.SetActive(false);
         letterPanel.SetActive(false);
     }
 
@@ -27,17 +29,23 @@ public class LetterUI : MonoBehaviour
         }
     }
 
-    public void ShowPrompt(bool show)
+    public void ShowReadPrompt(bool show)
     {
         // Don't show the prompt while the letter is open
-        promptObject.SetActive(show && !IsOpen);
+        readPrompt.SetActive(show && !IsOpen);
+    }
+
+    public void ShowUsePrompt(bool show)
+    {
+        // Don't show the prompt while the letter is open
+        usePrompt.SetActive(show && !IsOpen);
     }
 
     public void Open(string text)
     {
         letterText.text = text;
         letterPanel.SetActive(true);
-        promptObject.SetActive(false);
+        readPrompt.SetActive(false);
         Time.timeScale = 0f; // optional: pause the game while reading
     }
 

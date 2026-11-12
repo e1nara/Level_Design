@@ -127,4 +127,20 @@ public class Lamp : MonoBehaviour
     {
         if (_material != null) Destroy(_material);
     }
+
+    private bool playerInRange;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Player")) return;
+        playerInRange = true;
+        LetterUI.Instance.ShowUsePrompt(true);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("Player")) return;
+        playerInRange = false;
+        LetterUI.Instance.ShowUsePrompt(false);
+    }
 }

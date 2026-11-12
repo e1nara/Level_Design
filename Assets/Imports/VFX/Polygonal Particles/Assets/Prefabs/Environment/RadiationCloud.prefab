@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4594767808127368}
   - component: {fileID: 198762310510596846}
   - component: {fileID: 199237297952512206}
+  - component: {fileID: 1642531651576518781}
   m_Layer: 0
   m_Name: RadiationCloud
   m_TagString: Untagged
@@ -234,8 +235,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 3
       minMaxState: 3
-      scalar: 200
-      minScalar: 150
+      scalar: 150
+      minScalar: 100
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -536,7 +537,7 @@ ParticleSystem:
     sphericalDirectionAmount: 1
     randomPositionAmount: 0
     radius:
-      value: 5
+      value: 3
       mode: 0
       spread: 0
       speed:
@@ -3301,6 +3302,20 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!114 &1642531651576518781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1253122874872384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b91c17b89fc9d6848bf431297fdcb7ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SporeCloud
+  Radius: 3
+  EffectDuration: 3
 --- !u!1 &1966930690408756
 GameObject:
   m_ObjectHideFlags: 0
