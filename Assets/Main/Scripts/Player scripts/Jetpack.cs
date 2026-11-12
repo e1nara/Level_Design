@@ -30,12 +30,28 @@ public class Jetpack : MonoBehaviour
     [Tooltip("Bobs per second while hovering")]
     public float BobFrequency = 0.8f;
 
+    [Header("Heat")]
+    public float MaxHeat = 100f;
+
+    [Tooltip("Heat gained per second while the jetpack is active (including hovering). MaxHeat / this = seconds of use before overheating")]
+    public float HeatPerSecond = 25f;
+
+    [Tooltip("Heat lost per second while the jetpack is not active")]
+    public float CoolPerSecond = 15f;
+
+    [Tooltip("Extra cooling multiplier while standing on the ground (1 = same as in the air)")]
+    public float GroundCoolMultiplier = 1.5f;
+
+    [Tooltip("After overheating, the jetpack stays locked until heat drops below this fraction of MaxHeat (0-1). 0 = fully cooled")]
+    [Range(0f, 1f)]
+    public float RecoverThreshold = 0.4f;
+
     [Header("Fuel")]
     public float MaxFuel = 100f;
     public float StartingFuel = 100f;
 
     [Tooltip("Fuel used per second while the jetpack is active (including hovering)")]
-    public float FuelDrainPerSecond = 20f;
+    public float FuelDrainPerSecond = 10f;
 
     [Tooltip("Fuel regained per second while standing on the ground. 0 = only fuel packs refill")]
     public float GroundRegenPerSecond = 0f;
@@ -43,9 +59,16 @@ public class Jetpack : MonoBehaviour
     [Header("Effects (optional)")]
     public ParticleSystem ThrustParticles;
     public AudioSource ThrustLoopSound;
+    [Tooltip("Played while the jetpack is overheated and cooling down (e.g. smoke)")]
+    public ParticleSystem OverheatParticles;
+    [Tooltip("One-shot sound played the moment the jetpack overheats")]
+    public AudioSource OverheatSound;
 
     public float Fuel { get; private set; }
     public float FuelNormalized => Fuel / MaxFuel;
+    public float Heat { get; private set; }
+    public float HeatNormalized => Heat / MaxHeat;
+    public bool IsOverheated { get; private set; }
     public bool IsThrusting { get; private set; }
 
     private ThirdPersonController _controller;
@@ -57,6 +80,7 @@ public class Jetpack : MonoBehaviour
     {
         _controller = GetComponent<ThirdPersonController>();
         _animator = GetComponentInChildren<Animator>();
+        Heat = 0f;
         Fuel = Mathf.Clamp(StartingFuel, 0f, MaxFuel);
         _groundY = transform.position.y;
     }
@@ -76,8 +100,8 @@ public class Jetpack : MonoBehaviour
             }
         }
 
-        // the jetpack is "active" for as long as the button is held and there is fuel
-        bool active = JetpackInput.IsPressed() && Fuel > 0f;
+        // the jetpack is "active" while the button is held, it is not overheated and there is fuel
+        bool active = JetpackInput.IsPressed() && !IsOverheated && Fuel > 0f;
 
         if (active)
         {
@@ -93,7 +117,26 @@ public class Jetpack : MonoBehaviour
             targetSpeed += Mathf.Cos(Time.time * omega) * BobHeight * omega * hoverWeight;
 
             _controller.SteerVerticalVelocity(targetSpeed, ThrustAcceleration);
+
             Fuel = Mathf.Max(0f, Fuel - FuelDrainPerSecond * Time.deltaTime);
+
+            Heat += HeatPerSecond * Time.deltaTime;
+            if (Heat >= MaxHeat)
+            {
+                Heat = MaxHeat;
+                SetOverheated(true);
+                active = false; // stop thrusting this frame
+            }
+        }
+        else
+        {
+            float cool = CoolPerSecond * (_controller.Grounded ? GroundCoolMultiplier : 1f);
+            Heat = Mathf.Max(0f, Heat - cool * Time.deltaTime);
+
+            if (IsOverheated && Heat <= MaxHeat * RecoverThreshold)
+            {
+                SetOverheated(false);
+            }
         }
 
         SetThrusting(active);
@@ -102,6 +145,20 @@ public class Jetpack : MonoBehaviour
     public void AddFuel(float amount)
     {
         Fuel = Mathf.Clamp(Fuel + amount, 0f, MaxFuel);
+    }
+
+    private void SetOverheated(bool overheated)
+    {
+        if (overheated == IsOverheated) return;
+        IsOverheated = overheated;
+
+        if (OverheatParticles != null)
+        {
+            if (overheated) OverheatParticles.Play();
+            else OverheatParticles.Stop();
+        }
+
+        if (overheated && OverheatSound != null) OverheatSound.Play();
     }
 
     private void SetThrusting(bool thrusting)

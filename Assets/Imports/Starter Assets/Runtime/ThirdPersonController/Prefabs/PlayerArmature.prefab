@@ -1319,16 +1319,25 @@ MonoBehaviour:
       m_Flags: 0
     m_Flags: 0
     m_Priority: 0
-  ThrustAcceleration: 30
   MaxUpwardSpeed: 6
-  MaxHeightAboveGround: 5
-  SoftCeilingZone: 2
+  ThrustAcceleration: 30
+  MaxHeightAboveGround: 3
+  SoftCeilingZone: 1
+  BobHeight: 0.15
+  BobFrequency: 0.8
+  MaxHeat: 100
+  HeatPerSecond: 25
+  CoolPerSecond: 15
+  GroundCoolMultiplier: 1.5
+  RecoverThreshold: 0.4
   MaxFuel: 100
   StartingFuel: 100
   FuelDrainPerSecond: 1
   GroundRegenPerSecond: 0
   ThrustParticles: {fileID: 0}
   ThrustLoopSound: {fileID: 0}
+  OverheatParticles: {fileID: 0}
+  OverheatSound: {fileID: 0}
 --- !u!1 &4523139366846529165
 GameObject:
   m_ObjectHideFlags: 0
