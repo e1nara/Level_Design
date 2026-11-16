@@ -24,7 +24,7 @@ public class SporeCloud : MonoBehaviour
     {
         if (_player == null)
         {
-            ThirdPersonController controller = FindFirstObjectByType<ThirdPersonController>();
+            ThirdPersonController controller = FindAnyObjectByType<ThirdPersonController>();
             if (controller != null) _player = controller.transform;
         }
         return _player;

@@ -3315,7 +3315,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SporeCloud
   Radius: 3
-  EffectDuration: 3
+  EffectDuration: 0
 --- !u!1 &1966930690408756
 GameObject:
   m_ObjectHideFlags: 0
