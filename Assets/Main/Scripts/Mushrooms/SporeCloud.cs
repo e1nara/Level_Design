@@ -3,8 +3,9 @@ using UnityEngine;
 
 public class SporeCloud : MonoBehaviour
 {
-// Goes on the spore cloud PREFAB (the same object as its Particle System).
-// While the cloud exists and the player is within Radius of it, the screen effect is applied.
+    // Goes on the spore cloud PREFAB (the same object as its Particle System).
+    // While the cloud exists and the player is within Radius of it, the screen effect is applied
+    // and the player's oxygen drains.
     [Tooltip("How close (meters, world space) the player must be to the cloud for the screen effect to apply")]
     public float Radius = 3f;
 
@@ -52,19 +53,29 @@ public class SporeCloud : MonoBehaviour
         if (shouldAffect == _affecting) return;
 
         SporeVisionEffect effect = SporeVisionEffect.Instance;
-        if (effect == null) return;
+        Oxygen oxygen = Oxygen.Instance;
+        if (effect == null && oxygen == null) return;
 
         _affecting = shouldAffect;
-        if (_affecting) effect.Enter();
-        else effect.Exit();
+        if (_affecting)
+        {
+            if (effect != null) effect.Enter();
+            if (oxygen != null) oxygen.EnterSpores();
+        }
+        else
+        {
+            if (effect != null) effect.Exit();
+            if (oxygen != null) oxygen.ExitSpores();
+        }
     }
 
-    // runs when the cloud is destroyed too, so the effect can't get stuck on
+    // runs when the cloud is destroyed too, so the effect and oxygen drain can't get stuck on
     private void OnDisable()
     {
-        if (_affecting && SporeVisionEffect.Instance != null)
+        if (_affecting)
         {
-            SporeVisionEffect.Instance.Exit();
+            if (SporeVisionEffect.Instance != null) SporeVisionEffect.Instance.Exit();
+            if (Oxygen.Instance != null) Oxygen.Instance.ExitSpores();
         }
         _affecting = false;
     }

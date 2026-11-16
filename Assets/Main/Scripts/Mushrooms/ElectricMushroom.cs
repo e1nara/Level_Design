@@ -26,6 +26,19 @@ public class ElectricMushroom : MonoBehaviour
     [Tooltip("Seconds to fade between dull and glowing")]
     public float FadeDuration = 0.7f;
 
+    [Header("Pulse (while powered)")]
+    [Tooltip("How deep the pulse is. 0 = steady glow, 0.5 = brightness swings between 50% and 100%")]
+    [Range(0f, 1f)] public float PulseDepth = 0.35f;
+
+    [Tooltip("Pulses per second")]
+    public float PulseSpeed = 0.8f;
+
+    [Tooltip("Give each mushroom a random starting point in the pulse so several mushrooms don't pulse in perfect sync")]
+    public bool RandomizePhase = true;
+
+    [Tooltip("Optional: a Light (e.g. a Point Light on this mushroom) that pulses together with the glow and is off while unpowered")]
+    public Light PulseLight;
+
     [Header("Events (for machines, puzzles, sounds...)")]
     public UnityEvent OnPowered;
     public UnityEvent OnUnpowered;
@@ -41,9 +54,14 @@ public class ElectricMushroom : MonoBehaviour
     private Color _baseEmission;
     private float _level;          // 0 = dull, 1 = fully glowing
     private float _checkTimer;
+    private float _pulsePhase;
+    private float _baseLightIntensity;
 
     private void Awake()
     {
+        if (RandomizePhase) _pulsePhase = Random.value * Mathf.PI * 2f;
+        if (PulseLight != null) _baseLightIntensity = PulseLight.intensity;
+
         if (GlowRenderer == null) GlowRenderer = GetComponentInChildren<Renderer>();
 
         if (GlowRenderer == null)
@@ -93,11 +111,14 @@ public class ElectricMushroom : MonoBehaviour
         }
 
         float target = IsPowered ? 1f : 0f;
-        if (!Mathf.Approximately(_level, target))
+        bool fading = !Mathf.Approximately(_level, target);
+        if (fading)
         {
             _level = Mathf.MoveTowards(_level, target, Time.deltaTime / Mathf.Max(0.01f, FadeDuration));
-            ApplyEmission();
         }
+
+        // while any glow is showing, update every frame so the pulse keeps moving
+        if (fading || _level > 0f) ApplyEmission();
     }
 
     private bool CheckForLight()
@@ -119,8 +140,21 @@ public class ElectricMushroom : MonoBehaviour
 
     private void ApplyEmission()
     {
-        float intensity = Mathf.Lerp(DullIntensity, ActiveIntensity, _level);
+        // smooth wave between (1 - PulseDepth) and 1
+        float wave = 0.5f + 0.5f * Mathf.Sin(Time.time * PulseSpeed * Mathf.PI * 2f + _pulsePhase);
+        float pulse = Mathf.Lerp(1f - PulseDepth, 1f, wave);
+
+        // the pulse fades in with the power level, so a dull mushroom doesn't pulse
+        float pulseFactor = Mathf.Lerp(1f, pulse, _level);
+
+        float intensity = Mathf.Lerp(DullIntensity, ActiveIntensity, _level) * pulseFactor;
         _material.SetColor(EmissionColorID, _baseEmission * intensity);
+
+        if (PulseLight != null)
+        {
+            PulseLight.enabled = _level > 0.001f;
+            PulseLight.intensity = _baseLightIntensity * _level * pulseFactor;
+        }
     }
 
     private void OnDestroy()

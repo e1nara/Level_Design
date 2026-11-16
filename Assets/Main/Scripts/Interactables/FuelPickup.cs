@@ -1,72 +1,95 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Collider))]
 
 public class FuelPickup : MonoBehaviour
 {
-    [Tooltip("Fuel given to the jetpack on pickup")]
-    public float FuelAmount = 30f;
+    [Header("Interaction")]
+    [SerializeField] private Key interactKey = Key.E;
 
-    [Tooltip("Seconds until the pickup reappears. 0 or less = single use (destroyed)")]
-    public float RespawnTime = 0f;
+    [Tooltip("Seconds before the station can be used again. 0 = reusable immediately")]
+    [SerializeField] private float cooldown = 0f;
 
-    [Tooltip("Don't collect if the tank is already full")]
-    public bool IgnoreWhenFull = true;
-
-    [Header("Visuals (optional)")]
-    public float SpinSpeed = 90f;
-    public float BobHeight = 0.2f;
-    public float BobSpeed = 2f;
+    [Tooltip("Don't refill (and hide the prompt) if the tank is already full")]
+    [SerializeField] private bool ignoreWhenFull = true;
 
     [Header("Effects (optional)")]
-    public AudioClip PickupSound;
-    public GameObject PickupEffectPrefab;
+    [SerializeField] private AudioClip refillSound;
+    [SerializeField] private GameObject refillEffectPrefab;
+    [Tooltip("Where the effect spawns. Leave empty to use this object's position")]
+    [SerializeField] private Transform effectPoint;
 
-    private Vector3 _startPos;
-    private Collider _collider;
-    private Renderer[] _renderers;
+    private Jetpack _jetpackInRange;
+    private float _readyTime;
+    private bool _promptShown;
 
     private void Awake()
     {
-        _collider = GetComponent<Collider>();
-        _collider.isTrigger = true;
-        _renderers = GetComponentsInChildren<Renderer>();
-        _startPos = transform.position;
+        GetComponent<Collider>().isTrigger = true;
     }
 
     private void Update()
     {
-        //// idle spin + bob so the pickup is easy to spot
-        //transform.Rotate(Vector3.up, SpinSpeed * Time.deltaTime, Space.World);
-        //transform.position = _startPos + Vector3.up * (Mathf.Sin(Time.time * BobSpeed) * BobHeight);
+        if (_jetpackInRange == null) return;
+
+        bool canUse = CanUse(_jetpackInRange);
+        SetPrompt(canUse);
+
+        if (canUse && Keyboard.current != null && Keyboard.current[interactKey].wasPressedThisFrame)
+        {
+            Refuel(_jetpackInRange);
+        }
+    }
+
+    private bool CanUse(Jetpack jetpack)
+    {
+        if (Time.time < _readyTime) return false;
+        if (ignoreWhenFull && jetpack.Fuel >= jetpack.MaxFuel) return false;
+        return true;
+    }
+
+    private void Refuel(Jetpack jetpack)
+    {
+        jetpack.AddFuel(jetpack.MaxFuel); // clamped, so the tank ends up exactly full
+        _readyTime = Time.time + cooldown;
+
+        Vector3 pos = effectPoint != null ? effectPoint.position : transform.position;
+        if (refillSound != null) AudioSource.PlayClipAtPoint(refillSound, pos);
+        if (refillEffectPrefab != null) Instantiate(refillEffectPrefab, pos, Quaternion.identity);
+
+        // hide the prompt right away if it can't be used again (full tank / cooldown)
+        SetPrompt(CanUse(jetpack));
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // the jetpack sits on the player root, the collider may be on a child
-        Jetpack jetpack = other.GetComponentInParent<Jetpack>();
-        if (jetpack == null) return;
-        if (IgnoreWhenFull && jetpack.Fuel >= jetpack.MaxFuel) return;
+        if (!other.CompareTag("Player")) return;
 
-        jetpack.AddFuel(FuelAmount);
-
-        if (PickupSound != null) AudioSource.PlayClipAtPoint(PickupSound, transform.position);
-        if (PickupEffectPrefab != null) Instantiate(PickupEffectPrefab, transform.position, Quaternion.identity);
-
-        if (RespawnTime > 0f) StartCoroutine(RespawnRoutine());
-        else Destroy(gameObject);
+        // this is what Update needs: without it the key press is never handled
+        _jetpackInRange = other.GetComponentInParent<Jetpack>();
     }
 
-    private System.Collections.IEnumerator RespawnRoutine()
+    private void OnTriggerExit(Collider other)
     {
-        SetCollected(true);
-        yield return new WaitForSeconds(RespawnTime);
-        SetCollected(false);
+        if (!other.CompareTag("Player")) return;
+
+        _jetpackInRange = null;
+        SetPrompt(false);
     }
 
-    private void SetCollected(bool collected)
+    private void OnDisable()
     {
-        _collider.enabled = !collected;
-        foreach (var r in _renderers) r.enabled = !collected;
+        _jetpackInRange = null;
+        SetPrompt(false);
+    }
+
+    // only talks to the UI when the state actually changes
+    private void SetPrompt(bool visible)
+    {
+        if (visible == _promptShown) return;
+        _promptShown = visible;
+
+        if (LetterUI.Instance != null) LetterUI.Instance.ShowUsePrompt(visible);
     }
 }
