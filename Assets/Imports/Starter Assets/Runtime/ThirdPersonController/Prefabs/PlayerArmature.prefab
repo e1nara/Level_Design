@@ -1039,6 +1039,7 @@ GameObject:
   - component: {fileID: 4416926081852918493}
   - component: {fileID: 477696161290256487}
   - component: {fileID: 435560219004723681}
+  - component: {fileID: 4103781808783947622}
   m_Layer: 6
   m_Name: PlayerArmature
   m_TagString: Player
@@ -1074,7 +1075,7 @@ Animator:
   m_GameObject: {fileID: 4416926081852918481}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 36078ab0369161e49a29d349ae3e0739, type: 3}
-  m_Controller: {fileID: 9100000, guid: 40db3173a05ae3242b1c182a09b0a183, type: 2}
+  m_Controller: {fileID: 9100000, guid: 728be2e4ffe4a6a4c9834e4b1ce9a8b8, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1320,20 +1321,63 @@ MonoBehaviour:
       m_Flags: 0
     m_Flags: 0
     m_Priority: 0
+  AscendInput:
+    m_Name: JetpackAscend
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: 52904b02-fa39-4db0-9a9a-825faf3e27cb
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 9db04279-028c-492f-89b0-3652f22109ed
+      m_Path: <Mouse>/rightButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: JetpackAscend
+      m_Flags: 0
+    m_Flags: 0
+    m_Priority: 0
+  DescendInput:
+    m_Name: JetpackDescend
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: 0da1b4b0-d377-4d12-b868-f6c92a4ec6c7
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: b8fa8bfd-3369-45bf-a17c-42499a512ac1
+      m_Path: <Mouse>/leftButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: JetpackDescend
+      m_Flags: 0
+    m_Flags: 0
+    m_Priority: 0
   MaxUpwardSpeed: 6
+  MaxDownwardSpeed: 4
   ThrustAcceleration: 30
   MaxHeightAboveGround: 3
   SoftCeilingZone: 1
+  MinHeightAboveGround: 2
+  SoftFloorZone: 1.5
   BobHeight: 0.15
   BobFrequency: 0.8
   MaxHeat: 100
   HeatPerSecond: 25
+  HoverHeatMultiplier: 0.5
+  DescendHeatMultiplier: 0.25
   CoolPerSecond: 15
   GroundCoolMultiplier: 1.5
   RecoverThreshold: 0.4
   MaxFuel: 100
   StartingFuel: 100
   FuelDrainPerSecond: 1
+  HoverFuelMultiplier: 1
+  DescendFuelMultiplier: 0.5
   GroundRegenPerSecond: 0
   ThrustParticles: {fileID: 0}
   ThrustLoopSound: {fileID: 0}
@@ -1361,6 +1405,32 @@ MonoBehaviour:
   OnRecovered:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4103781808783947622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4416926081852918481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff7d34064c08aa64387ab68b86a725d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightProbeGun
+  probePrefab: {fileID: 8855460965676530403, guid: e2ae29bad35f8ed46a26e763c8fa9113, type: 3}
+  muzzle: {fileID: 1280728499532507157}
+  aimCamera: {fileID: 0}
+  launchSpeed: 30
+  maxAimDistance: 100
+  aimMask:
+    serializedVersion: 2
+    m_Bits: 55
+  fireCooldown: 0.2
+  animator: {fileID: 0}
+  shootTrigger: Shoot
+  recallTrigger: Recall
+  releaseDelay: 0.15
+  faceAimOnFire: 1
 --- !u!1 &4523139366846529165
 GameObject:
   m_ObjectHideFlags: 0
@@ -1422,6 +1492,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3677380931107609436}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4781260345193693816
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1280728499532507157}
+  m_Layer: 6
+  m_Name: Muzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1280728499532507157
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4781260345193693816}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8626512282341172403}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4905545990470132264
 GameObject:
@@ -1553,6 +1654,7 @@ Transform:
   - {fileID: 3964097221717966225}
   - {fileID: 4372607808223944788}
   - {fileID: 117881535543302510}
+  - {fileID: 1280728499532507157}
   m_Father: {fileID: 8322255484584408707}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5653482252439368515

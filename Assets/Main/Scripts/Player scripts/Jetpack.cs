@@ -12,10 +12,10 @@ public class Jetpack : MonoBehaviour
     public InputAction JetpackInput = new InputAction("Jetpack", InputActionType.Button, "<Keyboard>/f");
 
     [Tooltip("Hold (with the engine key) to climb")]
-    public InputAction AscendInput = new InputAction("JetpackAscend", InputActionType.Button, "<Mouse>/rightButton");
+    public InputAction AscendInput = new InputAction("JetpackAscend", InputActionType.Button, "<Keyboard>/q");
 
     [Tooltip("Hold (with the engine key) to descend. Cancels the automatic climb")]
-    public InputAction DescendInput = new InputAction("JetpackDescend", InputActionType.Button, "<Mouse>/leftButton");
+    public InputAction DescendInput = new InputAction("JetpackDescend", InputActionType.Button, "<Keyboard>/e");
 
     [Header("Movement")]
     [Tooltip("Top climbing speed (m/s)")]
