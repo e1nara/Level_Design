@@ -3314,7 +3314,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b91c17b89fc9d6848bf431297fdcb7ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SporeCloud
-  Radius: 3
+  Shape: 0
+  Size: {x: 5, y: 5, z: 1}
+  Radius: 0
+  Height: 1
+  Center: {x: 0, y: 0, z: -2}
+  UseTransformRotation: 1
   EffectDuration: 0
 --- !u!1 &1966930690408756
 GameObject:
