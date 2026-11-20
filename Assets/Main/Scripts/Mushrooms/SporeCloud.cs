@@ -5,8 +5,8 @@ public class SporeCloud : MonoBehaviour
 {
  
     // Goes on the spore cloud PREFAB (the same object as its Particle System).
-    // While the cloud exists and the player is inside its area, the screen effect is applied
-    // and the player's oxygen drains.
+    // While the cloud exists and any part of the player's body is inside its area, the screen
+    // effect is applied and the player's oxygen drains.
 
     public enum AreaShape { Box, Capsule, Sphere }
 
@@ -34,8 +34,11 @@ public class SporeCloud : MonoBehaviour
     public float EffectDuration = 0f;
 
     private const float ExitHysteresis = 0.3f; // extra meters before the player counts as "left", prevents flicker at the edge
+    private const float BodySampleSpacing = 0.2f; // meters between the points checked along the player's body
+    private const float FallbackBodyHeight = 1.8f; // used if the player has no CharacterController
 
     private static Transform _player;
+    private static CharacterController _playerController;
 
     private float _age;
     private bool _playerInside;
@@ -46,7 +49,11 @@ public class SporeCloud : MonoBehaviour
         if (_player == null)
         {
             ThirdPersonController controller = FindAnyObjectByType<ThirdPersonController>();
-            if (controller != null) _player = controller.transform;
+            if (controller != null)
+            {
+                _player = controller.transform;
+                _playerController = controller.GetComponent<CharacterController>();
+            }
         }
         return _player;
     }
@@ -90,6 +97,41 @@ public class SporeCloud : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// True if ANY part of the player's body is inside the area. The body is checked from the
+    /// feet to the head, so it doesn't matter which direction the player enters from.
+    /// </summary>
+    private bool IsPlayerInside(Transform player, float margin)
+    {
+        Vector3 basePosition = player.position;
+        float bottom;
+        float top;
+
+        if (_playerController != null)
+        {
+            Vector3 c = _playerController.center;
+            float halfHeight = _playerController.height * 0.5f;
+            basePosition += new Vector3(c.x, 0f, c.z);
+            bottom = c.y - halfHeight;
+            top = c.y + halfHeight;
+        }
+        else
+        {
+            bottom = 0f;
+            top = FallbackBodyHeight;
+        }
+
+        float bodyHeight = top - bottom;
+        int steps = Mathf.Max(1, Mathf.CeilToInt(bodyHeight / BodySampleSpacing));
+
+        for (int i = 0; i <= steps; i++)
+        {
+            float y = bottom + bodyHeight * i / steps;
+            if (IsInside(basePosition + Vector3.up * y, margin)) return true;
+        }
+        return false;
+    }
+
     private void Update()
     {
         _age += Time.deltaTime;
@@ -103,7 +145,7 @@ public class SporeCloud : MonoBehaviour
         }
         else
         {
-            _playerInside = IsInside(player.position, _playerInside ? ExitHysteresis : 0f);
+            _playerInside = IsPlayerInside(player, _playerInside ? ExitHysteresis : 0f);
         }
 
         bool active = EffectDuration <= 0f || _age < EffectDuration;

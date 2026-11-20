@@ -34,6 +34,13 @@ public class Lamp : MonoBehaviour
 
     public bool IsOn { get; private set; }
 
+    /// <summary>
+    /// Extra brightness multiplier (0-1) applied on top of the on/off fade.
+    /// Set by LampFlicker. Leave at 1 for a steady lamp.
+    /// </summary>
+    public float FlickerFactor { get; set; } = 1f;
+    private float _appliedFactor = 1f;
+
     private static readonly int EmissionColorID = Shader.PropertyToID("_EmissionColor");
 
     private LightSource _lightSource;
@@ -81,11 +88,17 @@ public class Lamp : MonoBehaviour
     private void Update()
     {
         float target = IsOn ? 1f : 0f;
-        if (Mathf.Approximately(_level, target)) return;
+        bool levelSettled = Mathf.Approximately(_level, target);
 
-        _level = FadeTime <= 0f
-            ? target
-            : Mathf.MoveTowards(_level, target, Time.deltaTime / FadeTime);
+        // nothing to do if the fade is finished and the flicker hasn't changed
+        if (levelSettled && Mathf.Approximately(_appliedFactor, FlickerFactor)) return;
+
+        if (!levelSettled)
+        {
+            _level = FadeTime <= 0f
+                ? target
+                : Mathf.MoveTowards(_level, target, Time.deltaTime / FadeTime);
+        }
 
         ApplyLevel();
     }
@@ -111,15 +124,18 @@ public class Lamp : MonoBehaviour
 
     private void ApplyLevel()
     {
+        _appliedFactor = FlickerFactor;
+        float level = _level * FlickerFactor;
+
         if (Spotlight != null)
         {
-            Spotlight.enabled = _level > 0.001f;
-            Spotlight.intensity = _baseIntensity * _level;
+            Spotlight.enabled = level > 0.001f;
+            Spotlight.intensity = _baseIntensity * level;
         }
 
         if (_material != null)
         {
-            _material.SetColor(EmissionColorID, _baseEmission * _level);
+            _material.SetColor(EmissionColorID, _baseEmission * level);
         }
     }
 

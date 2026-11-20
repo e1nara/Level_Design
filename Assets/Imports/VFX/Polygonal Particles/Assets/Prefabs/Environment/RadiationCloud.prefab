@@ -3315,10 +3315,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SporeCloud
   Shape: 0
-  Size: {x: 5, y: 5, z: 1}
+  Size: {x: 5, y: 5, z: 1.5}
   Radius: 0
   Height: 1
-  Center: {x: 0, y: 0, z: -2}
+  Center: {x: 0, y: 0, z: 0}
   UseTransformRotation: 1
   EffectDuration: 0
 --- !u!1 &1966930690408756
