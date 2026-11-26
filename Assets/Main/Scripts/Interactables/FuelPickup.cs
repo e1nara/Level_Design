@@ -90,6 +90,6 @@ public class FuelPickup : MonoBehaviour
         if (visible == _promptShown) return;
         _promptShown = visible;
 
-        if (LetterUI.Instance != null) LetterUI.Instance.ShowUsePrompt(visible);
+        if (LetterUI.Instance != null) LetterUI.Instance.ShowRefillPrompt(visible);
     }
 }

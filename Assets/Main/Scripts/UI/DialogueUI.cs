@@ -60,10 +60,30 @@ public class DialogueUI : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
-    public void SetPrompt(bool show, string label = null)
+    private bool _promptRequested;
+    private string _promptLabel;
+
+    /// <summary>
+    /// NPCs call this every frame while the player can talk to them.
+    /// The prompt is shown only if at least one NPC asked for it this frame.
+    /// </summary>
+    public void RequestPrompt(string label)
     {
-        if (promptRoot != null) promptRoot.SetActive(show);
-        if (show && promptText != null && label != null) promptText.text = label;
+        _promptRequested = true;
+        _promptLabel = label;
+    }
+
+    private void LateUpdate()
+    {
+        // runs after all NPC Update() calls, so the prompt always matches the current frame
+        bool show = _promptRequested && !IsOpen;
+        _promptRequested = false;
+
+        if (promptRoot != null && promptRoot.activeSelf != show)
+            promptRoot.SetActive(show);
+
+        if (show && promptText != null && _promptLabel != null)
+            promptText.text = _promptLabel;
     }
 
     public void Begin(object owner, string speaker, string[] lines)

@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 
 public class NpcDialogue : MonoBehaviour
 {
+
 /// <summary>
 /// Put this on the NPC. When the player (tag "Player") is close, a prompt appears;
 /// pressing the talk key starts the dialogue, and pressing it again skips the typing / goes to the next line.
@@ -31,7 +32,6 @@ public class NpcDialogue : MonoBehaviour
     public float TurnSpeed = 6f;
 
     private Transform _player;
-    private bool _promptShown;
 
     private void Start()
     {
@@ -52,13 +52,9 @@ public class NpcDialogue : MonoBehaviour
 
         bool talkingToMe = ui.IsOpen && ReferenceEquals(ui.Owner, this);
 
-        // prompt: only when in range and nobody is talking
-        bool shouldPrompt = inRange && !ui.IsOpen;
-        if (shouldPrompt != _promptShown)
-        {
-            _promptShown = shouldPrompt;
-            ui.SetPrompt(shouldPrompt, $"[{TalkKey}] Talk");
-        }
+        // prompt: ask for it every frame while in range and nobody is talking.
+        // DialogueUI hides it automatically on any frame nobody asks.
+        if (inRange && !ui.IsOpen) ui.RequestPrompt($"(Missing scientist) Talk [{TalkKey}]");
 
         // walked away mid-conversation
         if (!inRange && talkingToMe)
@@ -85,8 +81,6 @@ public class NpcDialogue : MonoBehaviour
         DialogueUI ui = DialogueUI.Instance;
         if (ui == null) return;
 
-        if (_promptShown) ui.SetPrompt(false);
-        _promptShown = false;
         if (ui.IsOpen && ReferenceEquals(ui.Owner, this)) ui.End();
     }
 

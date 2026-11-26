@@ -7,7 +7,10 @@ public class LetterUI : MonoBehaviour
     public static LetterUI Instance { get; private set; }
 
     [SerializeField] private GameObject readPrompt;
-    [SerializeField] private GameObject usePrompt;
+    [SerializeField] private GameObject usePrompt; 
+    [SerializeField] private GameObject refillPrompt;
+    [SerializeField] private GameObject talkPrompt;
+
 
     [SerializeField] private GameObject letterPanel;
     [SerializeField] private TMP_Text letterText;
@@ -39,6 +42,16 @@ public class LetterUI : MonoBehaviour
     {
         // Don't show the prompt while the letter is open
         usePrompt.SetActive(show && !IsOpen);
+    }
+    public void ShowRefillPrompt(bool show)
+    {
+        // Don't show the prompt while the letter is open
+        refillPrompt.SetActive(show && !IsOpen);
+    }
+    public void ShowTalkPrompt(bool show)
+    {
+        // Don't show the prompt while the letter is open
+        talkPrompt.SetActive(show && !IsOpen);
     }
 
     public void Open(string text)
